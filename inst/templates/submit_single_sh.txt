@@ -15,4 +15,4 @@
 module load simg_R/{{{r_version}}}
 
 # Run the slurm module
-Rscript slurm_run.R
+Rscript {{{tmpdir}}}/slurm_run.R

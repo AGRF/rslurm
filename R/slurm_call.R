@@ -77,7 +77,8 @@ slurm_call <- function(f, params, jobname = NA, add_objects = NULL,
     jobname <- make_jobname(jobname)
     
     # Create temp folder
-    tmpdir <- paste0("_rslurm_", jobname)
+    # Use full path with the here package
+    tmpdir <- here::here(paste0("_rslurm_", jobname))
     dir.create(tmpdir, showWarnings = FALSE)
     
     saveRDS(params, file = file.path(tmpdir, "params.RDS"))
@@ -94,7 +95,8 @@ slurm_call <- function(f, params, jobname = NA, add_objects = NULL,
     script_r <- whisker::whisker.render(template_r,
                     list(pkgs = pkgs,
                          add_obj = !is.null(add_objects),
-                         libPaths = libPaths))
+                         libPaths = libPaths,
+                         workdir = tmpdir))
     writeLines(script_r, file.path(tmpdir, "slurm_run.R"))
     
     # Create submission bash script
@@ -103,14 +105,18 @@ slurm_call <- function(f, params, jobname = NA, add_objects = NULL,
     slurm_options <- format_option_list(slurm_options)
     # Get version for module loading
     r_version = paste(R.Version()$major, R.Version()$minor, sep=".")
-    # Get directory of the project with the here package
+
+    # Project dir
+    # We start R in here
     project_dir = here::here()
+
     script_sh <- whisker::whisker.render(template_sh,
                                          list(jobname = jobname,
                                               flags = slurm_options$flags, 
                                               options = slurm_options$options,
                                               r_version = r_version,
-                                              project_dir = project_dir
+                                              project_dir = project_dir,
+                                              tmp_dir = tmpdir,
                                          ))
     writeLines(script_sh, file.path(tmpdir, "submit.sh"))
     

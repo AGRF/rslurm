@@ -101,8 +101,8 @@ slurm_apply <- function(f, params, jobname = NA, nodes = 2, cpus_per_node = 2,
 
     jobname <- make_jobname(jobname)
 
-    # Create temp folder
-    tmpdir <- paste0("_rslurm_", jobname)
+    # Use full path with the here package
+    tmpdir <- here::here(paste0("_rslurm_", jobname))
     dir.create(tmpdir, showWarnings = FALSE)
 
     saveRDS(params, file = file.path(tmpdir, "params.RDS"))
@@ -131,7 +131,8 @@ slurm_apply <- function(f, params, jobname = NA, nodes = 2, cpus_per_node = 2,
                          add_obj = !is.null(add_objects),
                          nchunk = nchunk,
                          cpus_per_node = cpus_per_node,
-                         libPaths = libPaths))
+                         libPaths = libPaths,
+                         workdir = tmpdir))
     writeLines(script_r, file.path(tmpdir, "slurm_run.R"))
 
     # Create submission bash script
@@ -148,7 +149,8 @@ slurm_apply <- function(f, params, jobname = NA, nodes = 2, cpus_per_node = 2,
                          flags = slurm_options$flags,
                          options = slurm_options$options,
                          r_version = r_version,
-                         project_dir = project_dir
+                         project_dir = project_dir,
+                         tmp_dir = tmpdir
                     ))
     writeLines(script_sh, file.path(tmpdir, "submit.sh"))
 

@@ -3,6 +3,9 @@
 {{#pkgs}}library({{.}}, quietly = TRUE)
 {{/pkgs}}
 
+# Change working directory to tmpdir
+setwd({{{workdir}}})
+
 {{#add_obj}}
 load('add_objects.RData')
 {{/add_obj}}
