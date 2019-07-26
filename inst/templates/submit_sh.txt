@@ -15,7 +15,7 @@
 module load simg_R/{{{r_version}}}
 
 # Set the SLURM_ARRAY_TASK_ID variable to be exported to singularity
-export SINGULARTIYENV_SLURM_ARRAY_TASK_ID=${SLURM_ARRAY_TASK_ID}
+export SINGULARITYENV_SLURM_ARRAY_TASK_ID=${SLURM_ARRAY_TASK_ID}
 
 # Run the rscript
 Rscript {{{tmp_dir}}}/slurm_run.R
