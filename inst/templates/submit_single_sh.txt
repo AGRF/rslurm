@@ -2,7 +2,7 @@
 #
 #SBATCH --ntasks=1
 #SBATCH --job-name={{{jobname}}}
-#SBATCH --output=slurm_0.out
+#SBATCH --output={{{tmp_dir}}}/slurm_0.out
 {{#flags}}
 #SBATCH --{{{name}}}
 {{/flags}}
