@@ -4,7 +4,7 @@
 {{/pkgs}}
 
 # Change working directory to tmpdir
-setwd({{{workdir}}})
+setwd('{{{workdir}}}')
 
 {{#add_obj}}
 load('add_objects.RData')
