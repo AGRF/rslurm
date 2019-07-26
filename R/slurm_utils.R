@@ -51,8 +51,9 @@ local_slurm_array <- function(slr_job) {
 # Submit job
 submit_slurm_job <- function(tmpdir) {
     old_wd <- setwd(tmpdir)
+    submit_file = file.path(tmpdir, 'submit.sh')
     tryCatch({
-        system("sbatch submit.sh")
+        system(paste("sbatch", submit_file))
     }, finally = setwd(old_wd))
 }
 
