@@ -54,7 +54,7 @@ submit_slurm_job <- function(tmpdir, outside_project_dir=NULL){
     submit_file = file.path(tmpdir, 'submit.sh')
     tryCatch({
         if (!is.null(outside_project_dir)){
-            system(paste("sbatch", file.path(outside_project_dir, tmpdir, submit_file)))
+            system(paste("sbatch", file.path(outside_project_dir, submit_file)))
         } else {
             system(paste("sbatch", submit_file))
         }

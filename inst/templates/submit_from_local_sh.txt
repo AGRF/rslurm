@@ -2,7 +2,7 @@
 #
 #SBATCH --array=0-{{{max_node}}}
 #SBATCH --job-name={{{jobname}}}
-#SBATCH --output={{{tmp_dir}}}/slurm_%a.out
+#SBATCH --output=/dev/null
 {{#flags}}
 #SBATCH --{{{name}}}
 {{/flags}}
@@ -42,7 +42,7 @@ export SINGULARITYENV_SLURM_ARRAY_TASK_ID=${SLURM_ARRAY_TASK_ID}
 
 # Run the rscript
 # Pump through srun to track timings
-srun Rscript {{{tmp_dir}}}/slurm_run.R
+srun Rscript {{{tmp_dir}}}/slurm_run.R 2>&1 > {{{tmp_dir}}}/slurm_${SLURM_ARRAY_TASK_ID}.out
 
 # Return the directory
 # Pump through srun to track timings

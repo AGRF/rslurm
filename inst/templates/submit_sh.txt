@@ -2,7 +2,7 @@
 #
 #SBATCH --array=0-{{{max_node}}}
 #SBATCH --job-name={{{jobname}}}
-#SBATCH --output={{{tmp_dir}}}/slurm_%a.out
+#SBATCH --output={{{project_dir}}}/{{{tmp_dir}}}/slurm_%a.out
 {{#flags}}
 #SBATCH --{{{name}}}
 {{/flags}}

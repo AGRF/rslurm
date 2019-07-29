@@ -161,7 +161,7 @@ slurm_apply <- function(f, params, jobname = NA, nodes = 2, cpus_per_node = 2,
              options = slurm_options$options,
              r_version = r_version,
              project_dir = project_dir,
-             tmp_dir = tmpdir
+             tmp_dir = basename(tmpdir)
         ))
 
     writeLines(script_sh, file.path(tmpdir, "submit.sh"))
