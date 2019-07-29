@@ -11,7 +11,7 @@
 {{/options}}
 #SBATCH --chdir={{{project_dir}}}
 
-# Load the singularity R module
+# Load the associated singularity R module
 module load simg_R/{{{r_version}}}
 
 # Run the rscript

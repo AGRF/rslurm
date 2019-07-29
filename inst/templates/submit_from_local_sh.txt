@@ -1,0 +1,56 @@
+#!/bin/bash
+#
+#SBATCH --array=0-{{{max_node}}}
+#SBATCH --job-name={{{jobname}}}
+#SBATCH --output=slurm_%a.out
+{{#flags}}
+#SBATCH --{{{name}}}
+{{/flags}}
+{{#options}}
+#SBATCH --{{{name}}}={{{value}}}
+{{/options}}
+
+# We don't want to continue if we fail
+set -e
+
+# Load the associated singularity R module
+module load simg_R/{{{r_version}}}
+
+# Create a tmp directory
+mktemp=$(mktemp /tmp/rslurm_XXXXX)
+
+trap "rm -rf ${mktemp}" EXIT
+
+cd ${mktemp}
+
+# Rsync across the required scripts and the packrat file.
+# Remove folders that are not part of the script.
+# Pump through srun to track timings
+srun rsync --archive --include='*/' \
+    --include='packrat/***' \
+    --exclude='{{{tmp_dir}}}/results_*' \
+    --include='{{{tmp_dir}}}/params.RDS' \
+    --include='{{{tmp_dir}}}/f.RDS' \
+    --include='{{{tmp_dir}}}/slurm_run.R' \
+    --include='*.Rproj' \
+    --exclude='*' \
+    --prune-empty-dirs \
+ ${SLURM_SUBMIT_HOST}:{{{outside_project_dir}}}/ $PWD/
+
+# Run the rscript
+# Pump through srun to track timings
+srun Rscript {{{tmp_dir}}}/slurm_run.R
+
+# Return the directory
+# Pump through srun to track timings
+srun rsync --archive --include='*/' --include='{{{tmp_dir}}}/***' \
+    --exclude='*' \
+    --prune-empty-dirs \
+ $PWD/ ${SLURM_SUBMIT_HOST}:{{{outside_project_dir}}}/
+
+# Change to our previous directory
+cd $OLDPWD
+
+# Delete the tmp directory and exit
+rm -rf ${mktemp}
+
