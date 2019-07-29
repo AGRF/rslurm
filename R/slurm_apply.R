@@ -145,7 +145,7 @@ slurm_apply <- function(f, params, jobname = NA, nodes = 2, cpus_per_node = 2,
     if (Sys.getenv("OUTSIDE_R_PACKRAT_PROJECT_DIR") == "") {
         template_sh <- readLines(system.file("templates/submit_sh.txt",
                                  package = "rslurm"))
-        project_dir = here:here()
+        project_dir = here::here()
     }
     else{
         # We're inside RSTUDIO and we're in local disc space
