@@ -135,23 +135,35 @@ slurm_apply <- function(f, params, jobname = NA, nodes = 2, cpus_per_node = 2,
                          workdir = tmpdir))
     writeLines(script_r, file.path(tmpdir, "slurm_run.R"))
 
-    # Create submission bash script
-    template_sh <- readLines(system.file("templates/submit_sh.txt",
-                                         package = "rslurm"))
+    # Create slurm options
     slurm_options <- format_option_list(slurm_options)
+
     # Get version for module loading
     r_version = paste(R.Version()$major, R.Version()$minor, sep=".")
-    # Get directory of the project with the here package
-    project_dir = here::here()
+
+    # Create submission bash script
+    if (Sys.getenv("OUTSIDE_R_PACKRAT_PROJECT_DIR") == "") {
+        template_sh <- readLines(system.file("templates/submit_sh.txt",
+                                 package = "rslurm"))
+        project_dir = here:here()
+    }
+    else{
+        # We're inside RSTUDIO and we're in local disc space
+        template_sh <- readLines(system.file("templates/submit_from_local_sh.txt",
+                                 package = "rslurm"))
+        project_dir = Sys.getenv("OUTSIDE_R_PACKRAT_PROJECT_DIR")
+    }
+
     script_sh <- whisker::whisker.render(template_sh,
-                    list(max_node = nodes - 1,
-                         jobname = jobname,
-                         flags = slurm_options$flags,
-                         options = slurm_options$options,
-                         r_version = r_version,
-                         project_dir = project_dir,
-                         tmp_dir = tmpdir
-                    ))
+        list(max_node = nodes - 1,
+             jobname = jobname,
+             flags = slurm_options$flags,
+             options = slurm_options$options,
+             r_version = r_version,
+             project_dir = project_dir,
+             tmp_dir = tmpdir
+        ))
+
     writeLines(script_sh, file.path(tmpdir, "submit.sh"))
 
     # Submit job to Slurm if applicable

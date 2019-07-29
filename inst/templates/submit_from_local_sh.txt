@@ -2,7 +2,7 @@
 #
 #SBATCH --array=0-{{{max_node}}}
 #SBATCH --job-name={{{jobname}}}
-#SBATCH --output=slurm_%a.out
+#SBATCH --output={{{tmp_dir}}}/slurm_%a.out
 {{#flags}}
 #SBATCH --{{{name}}}
 {{/flags}}
@@ -35,7 +35,10 @@ srun rsync --archive --include='*/' \
     --include='*.Rproj' \
     --exclude='*' \
     --prune-empty-dirs \
- ${SLURM_SUBMIT_HOST}:{{{outside_project_dir}}}/ $PWD/
+ ${SLURM_SUBMIT_HOST}:{{{project_dir}}}/ $PWD/
+
+# Set the SLURM_ARRAY_TASK_ID variable to be exported to singularity
+export SINGULARITYENV_SLURM_ARRAY_TASK_ID=${SLURM_ARRAY_TASK_ID}
 
 # Run the rscript
 # Pump through srun to track timings
@@ -43,10 +46,11 @@ srun Rscript {{{tmp_dir}}}/slurm_run.R
 
 # Return the directory
 # Pump through srun to track timings
-srun rsync --archive --include='*/' --include='{{{tmp_dir}}}/***' \
+srun rsync --archive --include='*/' \
+    --include='{{{tmp_dir}}}/***' \
     --exclude='*' \
     --prune-empty-dirs \
- $PWD/ ${SLURM_SUBMIT_HOST}:{{{outside_project_dir}}}/
+ $PWD/ ${SLURM_SUBMIT_HOST}:{{{project_dir}}}/
 
 # Change to our previous directory
 cd $OLDPWD
