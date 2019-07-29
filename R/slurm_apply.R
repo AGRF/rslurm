@@ -175,7 +175,7 @@ slurm_apply <- function(f, params, jobname = NA, nodes = 2, cpus_per_node = 2,
         if (Sys.getenv("OUTSIDE_R_PACKRAT_PROJECT_DIR") == ""){
             submit_slurm_job(tmpdir)
         } else {
-            submit_slurm_job(tmpdir, project_dir)
+            submit_slurm_job(basename(tmpdir), project_dir)
         }
     } else {
         cat(paste("Submission scripts output in directory", tmpdir))
