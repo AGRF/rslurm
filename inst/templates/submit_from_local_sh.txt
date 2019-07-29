@@ -17,7 +17,7 @@ set -e
 module load simg_R/{{{r_version}}}
 
 # Create a tmp directory
-mktemp=$(mktemp /tmp/rslurm_XXXXX)
+mktemp=$(mktemp -d /tmp/rslurm_XXXXX)
 
 trap "rm -rf ${mktemp}" EXIT
 
@@ -33,6 +33,7 @@ srun rsync --archive --include='*/' \
     --include='{{{tmp_dir}}}/f.RDS' \
     --include='{{{tmp_dir}}}/slurm_run.R' \
     --include='*.Rproj' \
+    --include='.Rprofile' \
     --exclude='*' \
     --prune-empty-dirs \
  ${SLURM_SUBMIT_HOST}:{{{project_dir}}}/ $PWD/
@@ -42,11 +43,12 @@ export SINGULARITYENV_SLURM_ARRAY_TASK_ID=${SLURM_ARRAY_TASK_ID}
 
 # Run the rscript
 # Pump through srun to track timings
-srun Rscript {{{tmp_dir}}}/slurm_run.R 2>&1 > {{{tmp_dir}}}/slurm_${SLURM_ARRAY_TASK_ID}.out
+srun Rscript {{{tmp_dir}}}/slurm_run.R > {{{tmp_dir}}}/slurm_${SLURM_ARRAY_TASK_ID}.out 2>&1
 
 # Return the directory
 # Pump through srun to track timings
-srun rsync --archive --include='*/' \
+srun rsync --archive \
+    --include='*/' \
     --include='{{{tmp_dir}}}/***' \
     --exclude='*' \
     --prune-empty-dirs \

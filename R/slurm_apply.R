@@ -132,7 +132,7 @@ slurm_apply <- function(f, params, jobname = NA, nodes = 2, cpus_per_node = 2,
                          nchunk = nchunk,
                          cpus_per_node = cpus_per_node,
                          libPaths = libPaths,
-                         workdir = tmpdir))
+                         workdir = basename(tmpdir)))
     writeLines(script_r, file.path(tmpdir, "slurm_run.R"))
 
     # Create slurm options
