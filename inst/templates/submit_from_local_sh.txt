@@ -40,7 +40,7 @@ export SINGULARITYENV_SLURM_ARRAY_TASK_ID=${SLURM_ARRAY_TASK_ID}
 
 # Run the rscript
 # Pump through srun to track timings
-srun Rscript {{{tmp_dir}}}/slurm_run.R > {{{tmp_dir}}}/slurm_${SLURM_ARRAY_TASK_ID}.out 2>&1
+srun -mpi=none Rscript {{{tmp_dir}}}/slurm_run.R > {{{tmp_dir}}}/slurm_${SLURM_ARRAY_TASK_ID}.out 2>&1
 
 # Return the directory
 # Pump through srun to track timings

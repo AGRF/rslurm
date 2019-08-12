@@ -1,0 +1,37 @@
+#!/bin/bash
+#
+#SBATCH --array=0-{{{max_node}}}
+#SBATCH --job-name={{{jobname}}}
+#SBATCH --output={{{tmp_dir}}}/slurm_%a.out
+{{#flags}}
+#SBATCH --{{{name}}}
+{{/flags}}
+{{#options}}
+#SBATCH --{{{name}}}={{{value}}}
+{{/options}}
+
+# Load the singularity R module
+module load simg_R/{{{r_version}}}
+
+# Create the tmp directory
+temp=$(mktemp /tmp/{{{project_dir}}}XXXX)
+
+trap 'rm -rf ${temp}' EXIT
+
+# Enter tmp space
+cd ${temp}
+
+# Rsync data from previous directory
+rsync --archive --include='*/' --include='packrat/***' --include='*.Rproj' --exclude='*' \
+ ${SLURM_SUBMIT_HOST}:{{{outside_dir}}}/ $PWD/
+
+# Set the SLURM_ARRAY_TASK_ID variable to be exported to singularity
+export SINGULARITYENV_SLURM_ARRAY_TASK_ID=${SLURM_ARRAY_TASK_ID}
+
+# Run the rscript
+Rscript {{{tmp_dir}}}/slurm_run.R
+
+# Move the output file back to the original space
+
+# Delete the folder
+rm -rf ${temp}
