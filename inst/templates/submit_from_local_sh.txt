@@ -10,9 +10,6 @@
 #SBATCH --{{{name}}}={{{value}}}
 {{/options}}
 
-# We don't want to continue if we fail
-set -e
-
 # Load the associated singularity R module
 module load simg_R/{{{r_version}}}
 
@@ -59,4 +56,16 @@ cd $OLDPWD
 
 # Delete the tmp directory and exit
 rm -rf ${mktemp}
+
+# If the Rscript passed we want to return 0 else 1
+rscript_task_id=1
+STATE=$(sacct -j ${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.${rscript_task_id} --noheader --format=State --parsable2)
+
+if [[ "${STATE}" == "COMPLETED" ]]; then
+    exit 0
+elif [[ "${STATE}" == "FAIL" ]]; then
+    exit 1
+else
+    echo "Unknown state ${STATE}" 1>&2
+fi
 
