@@ -14,11 +14,12 @@
 module load simg_R/{{{r_version}}}
 
 # Create a tmp directory
-mktemp=$(mktemp -d /tmp/rslurm_XXXXX)
+rslurm_temp_dir=$(mktemp -d /tmp/rslurm_XXXXX)
+rscript_temp_dir=$(mktemp -d /tmp/rscript_XXXXX)
 
-trap "rm -rf ${mktemp}" EXIT
+trap "rm -rf ${rslurm_temp_dir} ${rscript_temp_dir}" EXIT
 
-cd ${mktemp}
+cd ${rslurm_temp_dir}
 
 # Rsync across the required scripts and the packrat file.
 # Remove folders that are not part of the script.
@@ -35,12 +36,29 @@ srun rsync --archive --include='*/' \
     --prune-empty-dirs \
  ${SLURM_SUBMIT_HOST}:{{{project_dir}}}/ $PWD/
 
+
+# Set local vars
+R_IMAGE=/data/Bioinfo/bioinfo-resources/apps/singularity/simg_R/3.6.1/image/simg_R_3.6.1.simg
+CONTAINER_WORKDIR=/opt
+CONTAINER_TMPDIR=/scratch
+
+
 # Set the SLURM_ARRAY_TASK_ID variable to be exported to singularity
 export SINGULARITYENV_SLURM_ARRAY_TASK_ID=${SLURM_ARRAY_TASK_ID}
+export SINGULARITYENV_TMPDIR=${CONTAINER_TMPDIR}
+export SINGULARITYENV_TEMP=${CONTAINER_TMPDIR}
+export SINGULARITYENV_WORKDIR=${CONTAINER_TMPDIR}
 
 # Run the rscript
 # Pump through srun to track timings
-srun --mpi=none Rscript {{{tmp_dir}}}/slurm_run.R > {{{tmp_dir}}}/slurm_${SLURM_ARRAY_TASK_ID}.out 2>&1
+srun --mpi=none \
+    singularity run --contain --cleanenv --app Rscript \
+        --bind ${rscript_temp_dir}:${CONTAINER_TMPDIR} \
+        --bind $PWD:${CONTAINER_WORKDIR} \
+        --bind /data:/data \
+        --bind /Databases:/Databases \
+        ${R_IMAGE} \
+        ${WORK_ENV}/{{{tmp_dir}}}/slurm_run.R > $PWD/{{{tmp_dir}}}/slurm_${SLURM_ARRAY_TASK_ID}.out 2>&1
 
 # Return the directory
 # Pump through srun to track timings
@@ -55,7 +73,7 @@ srun rsync --archive \
 cd $OLDPWD
 
 # Delete the tmp directory and exit
-rm -rf ${mktemp}
+rm -rf ${rslurm_temp_dir} ${rscript_temp_dir}
 
 # If the Rscript passed we want to return 0 else 1
 rscript_task_id=1
