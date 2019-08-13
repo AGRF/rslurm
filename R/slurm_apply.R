@@ -119,7 +119,6 @@ slurm_apply <- function(f, params, jobname = NA,
     script_r <- whisker::whisker.render(template_r,
                     list(pkgs = pkgs,
                          add_obj = !is.null(add_objects),
-                         nchunk = nchunk,
                          libPaths = libPaths,
                          workdir = basename(tmpdir)))
     writeLines(script_r, file.path(tmpdir, "slurm_run.R"))
