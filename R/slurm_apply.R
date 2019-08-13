@@ -79,7 +79,7 @@
 #' cleanup_files(sjob)
 #' }
 #' @export
-slurm_apply <- function(f, params, jobname = NA, nodes = 2, cpus_per_node = 2,
+slurm_apply <- function(f, params, jobname = NA,
                         add_objects = NULL, pkgs = rev(.packages()),
                         libPaths = NULL, slurm_options = list(), submit = TRUE) {
     # Check inputs
@@ -91,12 +91,6 @@ slurm_apply <- function(f, params, jobname = NA, nodes = 2, cpus_per_node = 2,
     }
     if (is.null(names(params)) || !(names(params) %in% names(formals(f)))) {
         stop("column names of params must match arguments of f")
-    }
-    if (!is.numeric(nodes) || length(nodes) != 1) {
-        stop("nodes should be a single number")
-    }
-    if (!is.numeric(cpus_per_node) || length(cpus_per_node) != 1) {
-        stop("cpus_per_node should be a single number")
     }
 
     jobname <- make_jobname(jobname)
@@ -115,13 +109,9 @@ slurm_apply <- function(f, params, jobname = NA, nodes = 2, cpus_per_node = 2,
     
     # Get chunk size (nb. of param. sets by node)
     # Special case if less param. sets than CPUs in cluster
-    if (nrow(params) < cpus_per_node * nodes) {
-        nchunk <- cpus_per_node
-    } else {
-        nchunk <- ceiling(nrow(params) / nodes)
-    }
+    nchunk <- 1
     # Re-adjust number of nodes (only matters for small sets)
-    nodes <- ceiling(nrow(params) / nchunk)
+    nodes <- nrow(params)
 
     # Create a R script to run function in parallel on each node
     template_r <- readLines(system.file("templates/slurm_run_R.txt",
@@ -130,7 +120,6 @@ slurm_apply <- function(f, params, jobname = NA, nodes = 2, cpus_per_node = 2,
                     list(pkgs = pkgs,
                          add_obj = !is.null(add_objects),
                          nchunk = nchunk,
-                         cpus_per_node = cpus_per_node,
                          libPaths = libPaths,
                          workdir = basename(tmpdir)))
     writeLines(script_r, file.path(tmpdir, "slurm_run.R"))
