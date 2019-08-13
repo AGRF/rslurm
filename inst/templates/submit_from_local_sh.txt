@@ -46,7 +46,6 @@ CONTAINER_TMPDIR=/scratch
 # Set the SLURM_ARRAY_TASK_ID variable to be exported to singularity
 export SINGULARITYENV_SLURM_ARRAY_TASK_ID=${SLURM_ARRAY_TASK_ID}
 export SINGULARITYENV_TMPDIR=${CONTAINER_TMPDIR}
-export SINGULARITYENV_TEMP=${CONTAINER_TMPDIR}
 export SINGULARITYENV_WORKDIR=${CONTAINER_WORKDIR}
 
 # Run the rscript
@@ -58,7 +57,7 @@ srun --mpi=none \
         --bind /data:/data \
         --bind /Databases:/Databases \
         ${R_IMAGE} \
-        ${WORK_ENV}/{{{tmp_dir}}}/slurm_run.R > $PWD/{{{tmp_dir}}}/slurm_${SLURM_ARRAY_TASK_ID}.out 2>&1
+        ${CONTAINER_WORKDIR}/{{{tmp_dir}}}/slurm_run.R > $PWD/{{{tmp_dir}}}/slurm_${SLURM_ARRAY_TASK_ID}.out 2>&1
 
 # Return the directory
 # Pump through srun to track timings
