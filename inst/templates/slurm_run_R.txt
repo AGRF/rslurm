@@ -17,7 +17,7 @@ load('add_objects.RData')
 
 .rslurm_func <- readRDS('f.RDS')
 .rslurm_params <- readRDS('params.RDS')
-.rslurm_id <- as.numeric(Sys.getenv('SLURM_ARRAY_TASK_ID'))
+.rslurm_id <- as.numeric(Sys.getenv('SLURM_ARRAY_TASK_ID')) + 1
 
 .rslurm_result <- do.call(mapply,
                           c(FUN=.rslurm_func,
