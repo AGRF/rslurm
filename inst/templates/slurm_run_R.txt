@@ -1,4 +1,3 @@
-
 # Change to the packrat directory and then initialise (do this before anything else)
 setwd(Sys.getenv("WORKDIR"))
 library(packrat)
