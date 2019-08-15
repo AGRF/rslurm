@@ -8,19 +8,20 @@ packrat::init()
 {{#pkgs}}library({{.}}, quietly = TRUE)
 {{/pkgs}}
 
-# Change working directory to tmpdir
-setwd('{{{workdir}}}')
-
 {{#add_obj}}
 load('add_objects.RData')
 {{/add_obj}}
 
-.rslurm_func <- readRDS('f.RDS')
-.rslurm_params <- readRDS('params.RDS')
-.rslurm_id <- as.numeric(Sys.getenv('SLURM_ARRAY_TASK_ID')) + 1
+# We set the array id to the array task id,
+.array_id = as.numeric(Sys.getenv('SLURM_ARRAY_TASK_ID'))
+# but because R is 1-based indexed we use .rslurm_id to retrieve it from the dataframe
+.rslurm_id <- .array_id + 1
+
+.rslurm_func <- readRDS(file.path('{{{workdir}}}', 'f.RDS'))
+.rslurm_params <- readRDS(file.path('{{{workdir}}}', 'params.RDS'))
 
 .rslurm_result <- do.call(mapply,
                           c(FUN=.rslurm_func,
                           .rslurm_params[.rslurm_id, , drop = FALSE]))
 
-saveRDS(.rslurm_result, file = paste0('results_', .rslurm_id, '.RDS'))
+saveRDS(.rslurm_result, file = file.path('{{{workdir}}}', paste0('results_', .array_id, '.RDS')))
